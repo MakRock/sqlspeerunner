@@ -17,7 +17,7 @@ class Run:
         self.conn = psycopg2.connect(database=base, 
                                       user=os.environ['user'], 
                                       password=os.environ['password_db'], 
-                                      host="rc1b-vwzl3h7vh7hmbegr.mdb.yandexcloud.net", 
+                                      host="your_host", 
                                       port="6432",
                                       sslmode='verify-full')
         with self.conn.cursor() as cursor:
@@ -29,23 +29,16 @@ class Run:
         
         
     def get(self, table_name='', nrows='all', where='', cols='*', query='select'):
-#         start_time = time.time()
         limit = ['limit ' + str(nrows) if nrows != 'all' else ''][0]
-#         query = f"""SELECT * FROM {self.schema}.{table_name} {where} {limit}""" 
-#         query = f"""select god, count(distinct(kodpok)) from {self.schema}.{table_name} group by god"""
-#         query = f"""select god, kodpok from {self.schema}.{table_name} group by god, kodpok""" # Запрос с группировкой
         cols_query = ', '.join(cols)  
         if query == 'select':
             query = f"""SELECT {cols_query} FROM {self.schema}.{table_name} {where} {limit}"""
-#         query = """select * from information_schema.columns where table_schema = 'rosstat_bdmo' and column_name = 'nazsostv'"""
         sql = f"COPY ({query}) TO STDOUT WITH CSV HEADER"
         with tempfile.TemporaryFile() as tmpfile:
             with self.conn.cursor() as cursor:
                 cursor.copy_expert(sql, tmpfile)
                 tmpfile.seek(0)
                 data = pd.read_csv(tmpfile, dtype={'munr_oktmo':str, 'settlement_oktmo':str, 'sub_oktmo':str})
-#         end_time = time.time() - start_time
-#         print(f'Таблица загружена за {timing(end_time)}')
         return data
         
         
