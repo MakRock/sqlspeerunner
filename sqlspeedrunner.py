@@ -38,7 +38,7 @@ class Run:
             with self.conn.cursor() as cursor:
                 cursor.copy_expert(sql, tmpfile)
                 tmpfile.seek(0)
-                data = pd.read_csv(tmpfile, dtype={'munr_oktmo':str, 'settlement_oktmo':str, 'sub_oktmo':str})
+                data = pd.read_csv(tmpfile})
         return data
         
         
